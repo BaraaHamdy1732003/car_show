@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowRight, Maximize2 } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
 import { Car } from '../types/car';
+import { HeroCar } from './HeroCar';
 
 interface HeroSectionProps {
   onExploreCollection: () => void;
@@ -36,6 +37,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         <div className="absolute top-1/4 left-10 w-72 h-72 bg-[#D50000]/15 rounded-full blur-[140px] pointer-events-none" />
         <div className="absolute bottom-1/4 right-10 w-80 h-80 bg-[#FFD600]/10 rounded-full blur-[160px] pointer-events-none" />
       </div>
+
+      {/* Animated Hero Car (drives in on page load) */}
+      <HeroCar />
 
       {/* Hero Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex flex-col items-center text-center">
