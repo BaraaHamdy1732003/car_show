@@ -36,9 +36,13 @@ export default function App() {
   const [favorites, setFavorites] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('elite_auto_favorites');
-      return saved ? JSON.parse(saved) : ['ferrari-sf90-stradale', 'ferrari-testarossa', 'porsche-911-gt3-rs'];
+      if (!saved) return ['ferrari-sf90-stradale', 'ferrari-testarossa', 'porsche-911-gt3-rs'];
+      const parsed: unknown = JSON.parse(saved);
+      if (!Array.isArray(parsed)) return [];
+      const validIds = new Set(CARS.map((car) => car.id));
+      return parsed.filter((id): id is string => typeof id === 'string' && validIds.has(id));
     } catch {
-      return ['ferrari-sf90-stradale', 'ferrari-testarossa'];
+      return ['ferrari-sf90-stradale', 'ferrari-testarossa', 'porsche-911-gt3-rs'];
     }
   });
 
@@ -197,7 +201,7 @@ export default function App() {
                   onClick={() => handleNavigate('collection')}
                   className="inline-flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-neutral-300 hover:text-[#D50000] transition-colors"
                 >
-                  <span>View All 32 Vehicles</span>
+                  <span>View All {CARS.length} Vehicles</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>

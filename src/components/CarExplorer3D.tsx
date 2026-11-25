@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { Car, ComponentHotspot } from '../types/car';
 import {
   RotateCcw,
@@ -39,12 +40,14 @@ export const CarExplorer3D: React.FC<CarExplorer3DProps> = ({
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const [interiorAmbientColor, setInteriorAmbientColor] = useState<string>('#D50000');
   const [interiorSelectedHotspot, setInteriorSelectedHotspot] = useState<string | null>(null);
+  const [modelStatus, setModelStatus] = useState<'loading' | 'loaded' | 'fallback'>('loading');
 
   // References for Three.js state
   const sceneRef = useRef<THREE.Scene | null>(null);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const carGroupRef = useRef<THREE.Group | null>(null);
+  const modelGroupRef = useRef<THREE.Group | null>(null);
   const paintMaterialsRef = useRef<THREE.MeshPhysicalMaterial[]>([]);
   const windStreamlinesRef = useRef<THREE.LineSegments | null>(null);
   const isDraggingRef = useRef<boolean>(false);
@@ -69,6 +72,7 @@ export const CarExplorer3D: React.FC<CarExplorer3DProps> = ({
     // 2. Camera
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
     camera.position.set(4.5, 2.2, 5.0);
+    camera.lookAt(0, -0.05, 0);
     cameraRef.current = camera;
 
     // 3. Renderer
@@ -158,6 +162,55 @@ export const CarExplorer3D: React.FC<CarExplorer3DProps> = ({
     const carGroup = new THREE.Group();
     carGroupRef.current = carGroup;
     scene.add(carGroup);
+
+    const modelGroup = new THREE.Group();
+    modelGroup.visible = false;
+    modelGroupRef.current = modelGroup;
+    scene.add(modelGroup);
+
+    setModelStatus('loading');
+    let cancelled = false;
+    const modelLoader = new GLTFLoader();
+    modelLoader.load(
+      `/models/${car.id}.glb`,
+      (gltf) => {
+        if (cancelled) return;
+
+        const model = gltf.scene;
+        model.traverse((child) => {
+          if (!(child instanceof THREE.Mesh)) return;
+          child.castShadow = true;
+          child.receiveShadow = true;
+        });
+
+        const box = new THREE.Box3().setFromObject(model);
+        const size = box.getSize(new THREE.Vector3());
+        const longestAxis = Math.max(size.x, size.y, size.z);
+        if (longestAxis > 0) {
+          const scale = 4.2 / longestAxis;
+          model.scale.setScalar(scale);
+        }
+
+        const scaledBox = new THREE.Box3().setFromObject(model);
+        const center = scaledBox.getCenter(new THREE.Vector3());
+        model.position.sub(center);
+
+        const centeredBox = new THREE.Box3().setFromObject(model);
+        model.position.y += -0.68 - centeredBox.min.y;
+
+        modelGroup.add(model);
+        modelGroup.visible = true;
+        carGroup.visible = false;
+        setModelStatus('loaded');
+      },
+      undefined,
+      () => {
+        if (cancelled) return;
+        modelGroup.visible = false;
+        carGroup.visible = true;
+        setModelStatus('fallback');
+      }
+    );
 
     paintMaterialsRef.current = [];
 
@@ -411,6 +464,12 @@ export const CarExplorer3D: React.FC<CarExplorer3DProps> = ({
         carGroupRef.current.rotation.x +=
           (rotationTargetRef.current.x - carGroupRef.current.rotation.x) * 0.1;
       }
+      if (modelGroupRef.current) {
+        modelGroupRef.current.rotation.y +=
+          (rotationTargetRef.current.y - modelGroupRef.current.rotation.y) * 0.1;
+        modelGroupRef.current.rotation.x +=
+          (rotationTargetRef.current.x - modelGroupRef.current.rotation.x) * 0.1;
+      }
 
       // Wind tunnel pulse animation
       if (windStreamlinesRef.current && windStreamlinesRef.current.visible) {
@@ -427,16 +486,22 @@ export const CarExplorer3D: React.FC<CarExplorer3DProps> = ({
       if (!container || !renderer || !camera) return;
       const newWidth = container.clientWidth;
       const newHeight = container.clientHeight;
+      if (newWidth === 0 || newHeight === 0) return;
       camera.aspect = newWidth / newHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(newWidth, newHeight);
     };
 
     window.addEventListener('resize', handleResize);
+    const resizeObserver = new ResizeObserver(handleResize);
+    resizeObserver.observe(container);
+    handleResize();
 
     return () => {
+      cancelled = true;
       cancelAnimationFrame(animId);
       window.removeEventListener('resize', handleResize);
+      resizeObserver.disconnect();
       renderer.dispose();
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
@@ -631,9 +696,19 @@ export const CarExplorer3D: React.FC<CarExplorer3DProps> = ({
               {/* Top Viewport Floating Tag (matching photo) */}
               <div className="absolute top-4 left-4 z-20 pointer-events-none">
                 <div className="bg-black/80 backdrop-blur-md px-3.5 py-1.5 rounded-lg border border-[#D50000]/40 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#D50000]" />
+                  <span className={`w-2 h-2 rounded-full ${
+                    modelStatus === 'loaded'
+                      ? 'bg-emerald-400'
+                      : modelStatus === 'loading'
+                        ? 'bg-[#FFD600] animate-pulse'
+                        : 'bg-[#D50000]'
+                  }`} />
                   <span className="text-xs font-mono font-bold tracking-wider uppercase text-neutral-300">
-                    EXHIBITION PODIUM • 360° ORBITAL
+                    {modelStatus === 'loaded'
+                      ? 'REAL MODEL • 360° ORBITAL'
+                      : modelStatus === 'loading'
+                        ? 'LOADING REAL MODEL'
+                        : 'EXHIBITION PODIUM • PROCEDURAL FALLBACK'}
                   </span>
                 </div>
               </div>

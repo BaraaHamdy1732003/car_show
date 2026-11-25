@@ -1,5 +1,6 @@
 import React from 'react';
 import { BRANDS } from '../data/brands';
+import { CARS } from '../data/cars';
 import { soundEngine } from '../utils/audio';
 
 interface FooterProps {
@@ -29,7 +30,7 @@ export const Footer: React.FC<FooterProps> = ({ onSelectBrand, onNavigate }) => 
 
             <div className="flex items-center gap-2 text-xs font-mono text-neutral-500">
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>Showroom Stage Operational • 32 Masterpieces Active</span>
+              <span>Showroom Stage Operational • {CARS.length} Masterpieces Active</span>
             </div>
           </div>
 

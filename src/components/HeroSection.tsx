@@ -3,6 +3,9 @@ import { ArrowRight, Maximize2 } from 'lucide-react';
 import { soundEngine } from '../utils/audio';
 import { Car } from '../types/car';
 import { HeroCar } from './HeroCar';
+import { CARS } from '../data/cars';
+import { BRANDS } from '../data/brands';
+import { CATEGORIES } from '../data/categories';
 
 interface HeroSectionProps {
   onExploreCollection: () => void;
@@ -51,7 +54,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </span>
           <span className="hidden sm:inline-block w-1.5 h-1.5 rounded-full bg-neutral-600" />
           <span className="hidden sm:inline-block text-[11px] font-mono text-[#FFD600] font-bold">
-            32 Vehicles on Display
+            {CARS.length} Vehicles on Display
           </span>
         </div>
 
@@ -139,15 +142,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         {/* Statistics Ticker Bar */}
         <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 w-full max-w-4xl border-t border-neutral-800/80 pt-8 font-mono text-center">
           <div>
-            <div className="text-2xl sm:text-3xl font-black font-heading text-white">32</div>
+            <div className="text-2xl sm:text-3xl font-black font-heading text-white">{CARS.length}</div>
             <div className="text-[11px] text-neutral-500 uppercase tracking-wider">Curated Vehicles</div>
           </div>
           <div>
-            <div className="text-2xl sm:text-3xl font-black font-heading text-[#FF2020]">20</div>
+            <div className="text-2xl sm:text-3xl font-black font-heading text-[#FF2020]">{BRANDS.length}</div>
             <div className="text-[11px] text-neutral-500 uppercase tracking-wider">Iconic Marques</div>
           </div>
           <div>
-            <div className="text-2xl sm:text-3xl font-black font-heading text-[#FFD600]">12</div>
+            <div className="text-2xl sm:text-3xl font-black font-heading text-[#FFD600]">{CATEGORIES.length}</div>
             <div className="text-[11px] text-neutral-500 uppercase tracking-wider">Classifications</div>
           </div>
           <div>

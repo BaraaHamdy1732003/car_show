@@ -29,7 +29,7 @@ export const CarCard: React.FC<CarCardProps> = ({
         <img
           src={car.heroImage}
           alt={`${car.manufacturer} ${car.model}`}
-          className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700 ease-out"
+          className="w-full h-full object-cover object-center group-hover:scale-[1.08] transition-transform duration-700 ease-out"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#121212] via-transparent to-black/50" />
 

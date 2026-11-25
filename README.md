@@ -2,7 +2,7 @@
 
 > **Explore the Art of Automotive Engineering.**
 
-ELITE AUTO is a premium, cinematic automotive showroom for the browser. Visitors walk into a virtual international car exhibition, browse 32 iconic vehicles from 20 marques, and inspect them in real-time 3D. The whole experience runs on the frontend: no backend, no database, no login.
+ELITE AUTO is a premium, cinematic automotive showroom for the browser. Visitors walk into a virtual international car exhibition, browse a local catalog of vehicles from 20 marques, and inspect them in real-time 3D. The whole experience runs on the frontend: no backend, no database, no login.
 
 ---
 
